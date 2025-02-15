@@ -41,8 +41,12 @@ pub fn build(b: *std.Build) void {
     // step when running `zig build`).
     exe.linkLibC();
     b.installArtifact(exe);
-
-    // This *creates* a Run step in the build graph, to be executed when another
+    const llvm_include_path = "/home/wysl/llvm-project/llvm/include";
+    exe.addIncludePath(llvm_include_path);
+    const llvm_lib_path = "/home/wysl/llvm-project/build/lib";
+    exe.addLibraryPath(llvm_lib_path);
+    exe.linkSystemLibrary("LLVM");
+    exe.install();
     // step is evaluated that depends on it. The next line below will establish
     // such a dependency.
     const run_cmd = b.addRunArtifact(exe);

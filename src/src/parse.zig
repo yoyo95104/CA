@@ -6,11 +6,18 @@ const Node = ast.Node;
 const TokenType = main.TokenType;
 const BinOp = ast.BinOp;
 const Token = main.Token;
+const err = error{
+    ExpectedInteger,
+    ExpectedExpression,
+    ExpectedKeyword,
+    UnexpectedEOF,
+    InvalidOperator,
+};
 pub const Parse = struct {
-    tokens:[]const Token ,
-    pos: usize = 0 ,
+    tokens: []const Token,
+    pos: usize = 0,
 
-     fn currentToken(self: *Parse) ?Token {
+    fn currentToken(self: *Parse) ?Token {
         if (self.pos < self.tokens.len) {
             return self.tokens[self.pos];
         }
@@ -20,9 +27,9 @@ pub const Parse = struct {
         self.pos += 1;
     }
     fn parseInteger(self: *Parse, allocator: Allocator) !*Node {
-        const token = self.currentToken() orelse return error.UnexpectedEOF;
+        const token = self.currentToken() orelse return err.UnexpectedEOF;
         if (token.type != .Integer) {
-            return error.ExpectedInteger;
+            return err.ExpectedInteger;
         }
         self.advance();
         const integer = try std.fmt.parseInt(i64, token.value, 10);
@@ -42,7 +49,7 @@ pub const Parse = struct {
                     '-' => BinOp.Subtract,
                     '*' => BinOp.Multiply,
                     '/' => BinOp.Divide,
-                    else => return error.InvalidOperator,
+                    else => return err.InvalidOperator,
                 },
                 else => break,
             };
